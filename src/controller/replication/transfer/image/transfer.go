@@ -218,7 +218,13 @@ func (t *transfer) copyArtifact(srcRepo, srcRef, dstRepo, dstRef string, overrid
 
 	// check the existence of the artifact on the destination registry
 	exist, digest2, err := t.exist(dstRepo, dstRef)
-	if err != nil {
+	if err != nil && ! ( override && err.status && err.status === 412) {
+		/* 
+		Code 412 signifies a problem with either signing or cve's.  
+		The existance-check is only used to not override an existing image or prevent an unnecessary push
+		If the override option is enabled the existence of the image on the destination an be ignored
+		The status of cve's and signing can in this case also be ignored
+		*/
 		return err
 	}
 	if exist {
